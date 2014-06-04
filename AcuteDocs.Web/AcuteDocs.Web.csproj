@@ -133,6 +133,7 @@
     <Content Include="templates\home.html" />
     <Content Include="templates\navbar.html" />
     <Content Include="templates\setup.html" />
+    <Content Include="templates\walk-through.html" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

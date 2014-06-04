@@ -63,14 +63,26 @@
 	};
 	$AcuteDocs_Client_SetupController.__typeName = 'AcuteDocs.Client.SetupController';
 	global.AcuteDocs.Client.SetupController = $AcuteDocs_Client_SetupController;
+	////////////////////////////////////////////////////////////////////////////////
+	// AcuteDocs.Client.WalkThroughController
+	var $AcuteDocs_Client_WalkThroughController = function(page) {
+		this.$_page = null;
+		Acute.Controller.call(this);
+		this.$_page = page;
+	};
+	$AcuteDocs_Client_WalkThroughController.__typeName = 'AcuteDocs.Client.WalkThroughController';
+	global.AcuteDocs.Client.WalkThroughController = $AcuteDocs_Client_WalkThroughController;
 	ss.initClass($AcuteDocs_Client_App, $asm, {
 		configureRoutes: function(routeProvider) {
 			var $t1 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_SetupController]))();
 			$t1.set_templateUrl('templates/setup.html');
 			routeProvider.when('/setup', $t1);
-			var $t2 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_HomeController]))();
-			$t2.set_templateUrl('templates/home.html');
-			routeProvider.otherwise($t2);
+			var $t2 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_WalkThroughController]))();
+			$t2.set_templateUrl('templates/walk-through.html');
+			routeProvider.when('/walk-through', $t2);
+			var $t3 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_HomeController]))();
+			$t3.set_templateUrl('templates/home.html');
+			routeProvider.otherwise($t3);
 		}
 	}, Acute.App);
 	ss.initClass($AcuteDocs_Client_HomeController, $asm, {
@@ -84,7 +96,7 @@
 			scope.Page = this.$_page;
 		}
 	}, Acute.Controller);
-	ss.initEnum($AcuteDocs_Client_NavBarItem, $asm, { Home: 0, Setup: 1 });
+	ss.initEnum($AcuteDocs_Client_NavBarItem, $asm, { Home: 0, Setup: 1, Learn: 2 });
 	ss.initClass($AcuteDocs_Client_Page, $asm, {
 		get_Title: function() {
 			return this.$1$TitleField;
@@ -106,6 +118,10 @@
 					this.CurrentNavBarItemScriptName = 'setup';
 					break;
 				}
+				case 2: {
+					this.CurrentNavBarItemScriptName = 'learn';
+					break;
+				}
 				default: {
 					throw new ss.Exception('Unexpected nav-bar item');
 				}
@@ -123,11 +139,18 @@
 			this.$_page.set_CurrentNavBarItem(1);
 		}
 	}, Acute.Controller);
+	ss.initClass($AcuteDocs_Client_WalkThroughController, $asm, {
+		control: function(scope) {
+			this.$_page.set_Title('WalkThrough - Acute');
+			this.$_page.set_CurrentNavBarItem(2);
+		}
+	}, Acute.Controller);
 	ss.setMetadata($AcuteDocs_Client_App, { members: [{ name: '.ctor', type: 1, params: [] }] });
 	ss.setMetadata($AcuteDocs_Client_HomeController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_NavBarController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_Page, { members: [{ name: '.ctor', type: 1, params: [] }] });
 	ss.setMetadata($AcuteDocs_Client_PageController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_SetupController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
+	ss.setMetadata($AcuteDocs_Client_WalkThroughController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 })();
 Acute.Bootstrap();

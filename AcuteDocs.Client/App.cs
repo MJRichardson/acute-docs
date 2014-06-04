@@ -12,6 +12,7 @@ namespace AcuteDocs.Client
         protected override void ConfigureRoutes(RouteProvider routeProvider)
         {
             routeProvider.When("/setup", new RouteConfig<SetupController> {TemplateUrl = "templates/setup.html"});
+            routeProvider.When("/walk-through", new RouteConfig<WalkThroughController> {TemplateUrl = "templates/walk-through.html"});
             routeProvider.Otherwise(new RouteConfig<HomeController> {TemplateUrl = "templates/home.html"});
         }
     }

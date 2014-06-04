@@ -24,6 +24,10 @@ namespace AcuteDocs.Client
                         CurrentNavBarItemScriptName = "setup";
                         break;
 
+                    case NavBarItem.Learn:
+                        CurrentNavBarItemScriptName = "learn";
+                        break;
+
                     default: 
                         throw new Exception("Unexpected nav-bar item"); 
                     

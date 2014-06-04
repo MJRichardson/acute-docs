@@ -3,6 +3,7 @@
     public enum NavBarItem
     {
         Home,
-        Setup
+        Setup,
+        Learn
     }
 }

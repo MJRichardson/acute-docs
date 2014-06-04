@@ -1,0 +1,670 @@
+﻿<div class="row" acute-ignore>
+    <!-- scrollspy nav -->
+    <div class="col-md-3">
+        <div id="contents-menu">
+            <ul class="nav nav-pills nav-stacked">
+                <li><a href="#create-solution">1 - Create Solution</a></li>
+                <li><a href="#create-web-project">2 - Create Web Project</a></li>
+                <li><a href="#add-static-html">3 - Add Static HTML</a></li>
+                <li><a href="#create-acute-project">4 - Create Acute Project</a></li>
+                <li><a href="#add-acute-nuget-package">5 - Add Acute Nuget Package</a></li>
+                <li><a href="#copy-javascript">6 - Copy Generated Javascript</a></li>
+                <li><a href="#create-client-application">7 - Create Client Application</a></li>
+                <li><a href="#create-controller">8 - Create Controller</a></li>
+                <li><a href="#create-template">9 - Create Template</a></li>
+                <li><a href="#navigation">10 - Navigation</a></li>
+                <li><a href="#add-service">11 - Add a Service</a></li>
+                <li><a href="#http">12 - Get data via HTTP</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div id="page-header" class="page-header">
+            <h1>Walk-Through <small>Creating an Acute-powered application</small></h1>
+        </div>
+
+        <div>
+            <p>This walk-through aims to introduce you to Acute. It provides a step-by-step guide for guide for beginning an Acute application, and introduces a few key concepts and components along the way.</p>
+
+            <p>The corresponding code is contained in a Git repository: <a href="https://github.com/mjrichardson/acute-acme">https://github.com/mjrichardson/acute-acme</a></p>
+
+            <p>Each step of the walk-through has a corresponding tag in the repo. To set the code to match step 1, for example, you would use:</p>
+            <pre>
+git checkout -f step-1
+</pre>
+        </div>
+
+        <div id="create-solution" class="walk-through-step">
+            <h3>Create Solution</h3>
+            <p>We'll begin by creating an empty solution in Visual Studio. The following instructions assume Visual Studio 2012, but other versions should be close enough.</p>
+            <p><kbd>File</kbd> -> <kbd>New</kbd> -> <kbd>Project</kbd>.</p>
+            <p>Choose <kbd>Templates</kbd> -> <kbd>Other Project Types</kbd> -> <kbd>Visual Studio Solutions</kbd>, and select <kbd>Blank Solution</kbd>.</p>
+            <p>For the name, we'll use <kbd>Acme</kbd>.</p>
+            <img src="images/walk-through-create-solution.png" />
+        </div>
+
+        <div id="create-web-project" class="walk-through-step">
+            <h3>Create Web Project</h3>
+            <p>Now we need to create a web project to serve our content.</p>
+            <p>Right Click on the solution.</p>
+            <p><kbd>Add</kbd> --> <kbd>New Project</kbd></p>
+            <p>Select <kbd>Visual C#</kbd> --> <kbd>Web</kbd></p>
+            <p>We'll select <kbd>ASP.NET MVC 4 Web Application</kbd>.  For the moment, an empty project would suffice, but later we will add some services using Web API controllers. </p>
+            <p>Name the project <kbd>Acme.Web</kbd></p>
+            <img src="images/walk-through-create-web-project.png" />
+            <p>When Visual Studio prompts you to select a template, choose <kbd>Empty</kbd></p>
+            <img src="images/walk-through-create-web-project-2.png" />
+        </div>
+
+        <div id="add-static-html" class="walk-through-step">
+            <h3>Add Static HTML</h3>
+            <p>To start, let's add a plain old static HTML page, called <kbd>index.html</kbd> to the Acme.Web project.</p>
+            <pre class="prettyprint">
+&lt;html&gt;
+    
+    &lt;head&gt;
+        &lt;title&gt;Products - Acme Corporation&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;body&gt;
+        
+        &lt;h1&gt;Acme Corporation&lt;/h1&gt;
+        
+        &lt;h2&gt;Products&lt;/h2&gt;
+        
+        &lt;div&gt;
+            &lt;h3&gt;Giant Rubber-Band&lt;/h3&gt; 
+            &lt;p&gt;Perfect for tripping Road Runners&lt;/p&gt;
+        &lt;/div&gt; 
+
+    &lt;/body&gt;
+
+&lt;/html&gt;
+					  </pre>
+
+            <p>We will progressively enhance this Acme product-catalog.</p>
+        </div>
+
+        <div id="create-acute-project" class="walk-through-step">
+            <h3>Create Acute Project</h3>
+            <p>OK, now we get to the interesting stuff. Let's create our dynamic client application, powered by Acute.</p>
+            <p>Create a class-library project:</p>
+            <p>Right Click on the solution.</p>
+            <p><kbd>Add</kbd> --> <kbd>New Project</kbd></p>
+            <p>Select <kbd>Visual C#</kbd> --> <kbd>Class Library</kbd></p>
+            <p>Name the project <kbd>Acme.Client</kbd></p>
+            <img src="images/walk-through-create-client-project.png" />
+            <p>Remove the generated Class1.cs file from the project.</p>
+        </div>
+
+        <div id="add-acute-nuget-package" class="walk-through-step">
+            <h3>Add Acute Nuget Package</h3>
+            <p>Open the Package Manager Console (<kbd>Tools</kbd> -> <kbd>Library Package Manager</kbd> -> <kbd>Package Manager Console</kbd></p>
+            <p>Enter <kbd>Install-Package Acute -Project Acme.Client</kbd> into the Package Manager Console</p>
+            <p>Once the package is installed, you need to unload and reload the Acute.Client project. This is due to a glitch with Visual Studio when mscorlib.dll is replaced with a custom version.</p>
+        </div>
+
+        <div id="copy-javascript" class="walk-through-step">
+            <h3>Copy Generated Javascript</h3>
+            <p>When an Acute project is compiled, it produces a javascript file as output. This javascript will be needed by the web project. One way to achieve this, is to setup a post-build event in the web project.</p>
+            <p>First we need to ensure that Visual Studio always compile the Acute client project before the web project. Right-click the solution, and select <kbd>Properties</kbd>, then select <kbd>Common Properties</kbd> -> <kbd>Project Dependencies</kbd>. Select <kbd>Acme.Web</kbd> in the drop-down-list, and check <kbd>Acute.Client</kbd>.  </p>
+            <img src="images/walk-through-solution-project-dependencies.png" />
+            <p>And now we can add the post-build event. Right-click on the <code>Acme.Web</code> project, and select <kbd>Properties</kbd>, then <kbd>Build Events</kbd>. Add the following in the box labelled <kbd>Post-build event command-line:</kbd></p>
+            <pre>
+xcopy $(SolutionDir)Acme.Client\acute.min.js $(ProjectDir) /y
+xcopy $(SolutionDir)Acme.Client\bin\$(ConfigurationName)\Acme.Client.js $(ProjectDir) /y
+</pre>
+            <p>The first line copies the Acute framework javascript file to the web project folder. The second copies the javascript produced by compiling the client project.</p>
+
+        </div>
+
+        <div id="create-client-application" class="walk-through-step">
+            <h3>Create Client Application</h3>
+            <p>Now we will create the class that represents our application.</p>
+            <p>Add a new class named <code>AcmeApp</code> to the project.</p>
+            <pre class="prettyprint">
+namespace Acme.Client
+{
+    public class AcmeApp : Acute.App
+    {
+    }
+}
+					  </pre>
+            <p>Inheriting from <code>Acute.App</code> marks this class as being the application.</p>
+
+        </div>
+
+        <div id="create-controller" class="walk-through-step">
+            <h3>Create Controller</h3>
+            <p>It's time to put the <em>C</em> in <em>MVC</em>.</p>
+            <p>See <a href="concepts.html#controllers">Concepts - Controllers</a> for an understanding of the role controllers play in an Acute application.</p>
+            <p>But before that, let's create a class <code>Product</code> (because we're C# folks, and we like types). </p>
+            <pre class="prettyprint">
+namespace Acme.Client
+{
+    [Serializable]
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+
+    }
+}
+					  </pre>
+            <p><span class="label label-info">Information:</span> The reason for the <code>Serializable</code> attribute will be explained later.</p>
+            <p>Now create a <code>ProductsController</code> class.</p>
+            <pre class="prettyprint">
+using Acute;
+
+namespace Acme.Client
+{
+    public class ProductsController : Controller
+    {
+        public override void Control(dynamic scope)
+        {
+	    scope.Products = new Product[]
+		{
+		   new Product{
+		       Id =1, 
+		       Name="Giant Rubber-Band", 
+		       Description = "Perfect for tripping Road Runners", 
+		       Price = 9.99m},  
+
+		   new Product{
+		       Id =2, 
+		       Name="Earthquake Pills", 
+		       Description = "Why wait? Make your own earthquakes - loads of fun!", 
+		       Price = 11.00m },  
+
+		   new Product{
+		       Id =3, 
+		       Name="Explosive Tennis Balls", 
+		       Description = "Tickle your friends! Surprise your opponent!", 
+		       Price = 25.40m }  
+		};
+        }
+    }
+}
+					  </pre>
+        </div>
+
+        <div id="create-template" class="walk-through-step">
+            <h3>Create Template</h3>
+            <p>It's time for our static-HTML-content caterpillar to metamorphose into a <a href="concepts.html#templates">template</a> butterfly. And put the <em>V</em> in <em>MVC</em>.</p>
+            <p>Modify index.html like so:</p>
+            <pre class="prettyprint">
+&lt;html acute-app="Acme.Client.AcmeApp"&gt;
+    
+    &lt;head&gt;
+        &lt;title&gt;Products - Acme Corporation&lt;/title&gt;
+        
+        &lt;script type="text/javascript" src="acute.min.js"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript" src="Acme.Client.js"&gt;&lt;/script&gt;
+    &lt;/head&gt;
+
+    &lt;body acute-controller="Acme.Client.ProductsController"&gt;
+        
+        &lt;h1&gt;Acme Corporation&lt;/h1&gt;
+        
+        &lt;h2&gt;Products&lt;/h2&gt;
+        
+        &lt;div acute-repeat="product in Products"&gt;
+            &lt;h3&gt;{{product.Name}} - {{product.Price | currency}}&lt;/h3&gt; 
+            &lt;p&gt;{{product.Description}}&lt;/p&gt;
+        &lt;/div&gt;
+
+    &lt;/body&gt;
+
+&lt;/html&gt;
+					  </pre>
+            <p>You'll notice we've added some <code>acute-*</code> attributes. These are <a href="concepts.html#directives">directives</a>. The specific ones used are, in order:</p>
+            <ul>
+                <li><code>app</code> - This directives identifies the root element of your Acute application.</li>
+                <li><code>controller</code> - Attaches a <a href="concepts.html#controllers">controller</a> to the view. You can also attach controllers via <a href="concepts.html#routing">routes</a>, which we will see later.</li>
+                <li><code>repeat</code> - Instantiates a template once per item in a collection. We've replaced the static content in <code>index.html</code> with a repeat directive bound to the products list created by the controller.</li>
+            </ul>
+            <p><span class="label label-info">Information:</span> <code>{{product.Price | current}}</code> is an example of a <a href="concepts.html#filters">filter</a>.</p>
+
+            <p>At this point you should be able to run the application (ensure the web project is set as the start-up project). Navigate to <kbd>index.html</kbd> and view the list of products.</p>
+
+        </div>
+
+        <div id="navigation" class="walk-through-step">
+            <h3>Navigation</h3>
+            <p>Next, let us explore the uncharted territories of our application, by harnessing navigation.</p>
+            <p>Every good e-commerce site needs a shopping-cart.</p>
+            <p>Add a new file to the Acme.Web project: <code>cart.html</code>:</p>
+            <pre class="prettyprint">
+&lt;h2&gt;Shopping Cart&lt;/h2&gt;
+
+&lt;p&gt;You have nothing in your cart...&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="#/products"&gt;Continue shopping&lt;/a&gt;&lt;/p&gt;
+					  </pre>
+            <p>And add another file: <code>products.html</code>:</p>
+            <pre class="prettyprint">
+&lt;h2&gt;Products&lt;/h2&gt;  
+
+&lt;div acute-repeat="product in Products"&gt;
+    &lt;h3&gt;{{product.Name}} - {{product.Price | currency}}&lt;/h3&gt; 
+    &lt;p&gt;{{product.Description}}&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="#/cart"&gt;Shopping-Cart&lt;/a&gt;&lt;/p&gt;
+					  </pre>
+            <p>Modify <code>index.html</code>:</p>
+            <pre class="prettyprint">
+&lt;html acute-app="Acme.Client.AcmeApp"&gt;
+    
+    &lt;head&gt;
+        &lt;title&gt;Products - Acme Corporation&lt;/title&gt;
+        
+        &lt;script type="text/javascript" src="acute.min.js"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript" src="Acme.Client.js"&gt;&lt;/script&gt;
+    &lt;/head&gt;
+
+    &lt;body acute-controller="Acme.Client.ProductsController"&gt;
+        
+        &lt;h1&gt;Acme Corporation&lt;/h1&gt;
+        
+        &lt;div acute-view&gt;&lt;/div&gt;
+
+    &lt;/body&gt;
+
+&lt;/html&gt;
+
+					  </pre>
+            <p>Note the <code>acute-view</code> directive we have added. This allows the content for that element to be loaded dynamically.</p>
+            <p>The final step is to configure our <a href="concepts.html#routing">routes</a>. Modify <code>AcmeApp.cs</code>:</p>
+            <pre class="prettyprint">
+using Acute;
+
+namespace Acme.Client
+{
+    public class AcmeApp : Acute.App
+    {
+        protected override void ConfigureRoutes(RouteProvider routeProvider)
+        {
+            routeProvider.When("/cart", new RouteConfig {TemplateUrl = "cart.html"});
+            routeProvider.Otherwise(new RouteConfig&lt;ProductsController&gt; {TemplateUrl = "products.html"});
+        }
+    }
+}
+					  </pre>
+            <!-- todo: link to routeprovider docs -->
+            <p>We have implemented the <code>ConfigureRoutes</code> method, where we use the <code>RouteProvider</code> to configure the routes.</p>
+
+            <p>If you run the application now, you will be able to navigate between the products list and the (always empty) shopping cart. Next we'll work on putting something in that shopping cart.</p>
+        </div>
+
+        <div id="add-service" class="walk-through-step">
+            <h3>Add a Service</h3>
+            <p>Our store won't be very successful if customers can't buy our products. Let's change that.</p>
+            <p>Add a new class to the <code>Acme.Client</code> project named <code>CartService.cs</code>:</p>
+
+            <pre class="prettyprint">
+using System.Collections.Generic;
+
+namespace Acme.Client
+{
+    public class CartService
+    {
+        private readonly Dictionary&lt;string, int&gt; _productQuantities = new Dictionary&lt;string, int&gt;(); 
+
+        public void AddToCart(string productName)
+        {
+            //if the dictionary does not contain the product
+            if (!_productQuantities.ContainsKey(productName))
+            {
+                //then add with a quantity of 1
+                _productQuantities.Add(productName, 1);
+                return;
+            }
+
+            //otherwise increment the quantity
+            _productQuantities[productName] = _productQuantities[productName] + 1;
+
+        }
+
+        public IDictionary&lt;string, int&gt; ProductsInCart { get { return _productQuantities; }} 
+    }
+}
+					  </pre>
+
+            <p>This service will represent our 'shopping-cart'.</p>
+
+            <p>We will add a 'buy' button to our <code>products.html</code>.</p>
+
+            <pre class="prettyprint">
+&lt;h2&gt;Products&lt;/h2&gt;  
+
+&lt;div acute-repeat="product in Products"&gt;
+    &lt;h3&gt;{{product.Name}} - {{product.Price | currency}}&lt;/h3&gt; 
+    &lt;p&gt;{{product.Description}}&lt;/p&gt;
+    &lt;p&gt;&lt;input type="button" value="Buy" acute-click="AddToCart(product.Name)"/&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="#/cart"&gt;Shopping-Cart&lt;/a&gt;&lt;/p&gt;
+					  </pre>
+
+            <p>
+                Note the <a href="directives.html#click">acute-click</a> directive on the button. When the button is clicked, this will cause the <code>AddToCart()</code> function to be called on the 
+            scope. So let's take a look at the modified <code>ProductsController.cs</code>.
+            </p>
+
+            <pre class="prettyprint">
+using System;
+
+namespace Acme.Client
+{
+    public class ProductsController : Acute.Controller
+    {
+        private readonly CartService _cartService;
+
+        public ProductsController(CartService cartService)
+        {
+            _cartService = cartService;
+        }
+
+        public override void Control(dynamic scope)
+        {
+            scope.Products = new Product[]
+            {
+                new Product
+                {
+                    Id = 1,
+                    Name = "Giant Rubber-Band",
+                    Description = "Perfect for tripping Road Runners",
+                    Price = 0.99m
+                },
+                new Product
+                {
+                    Id = 2,
+                    Name = "Earthquake Pills",
+                    Description = "Why wait? Make your own earthquakes - loads of fun!",
+                    Price = 10.00m
+                }
+            };
+
+            scope.AddToCart = (Action&lt;string&gt;)(productName =&gt; _cartService.AddToCart(productName));
+
+        }
+    }
+}
+					  </pre>
+
+            <p>The changes are:</p>
+            <ul>
+                <li>The constructor now accepts a <code>CartService</code>.</li>
+                <li>The last line of the <code>Control()</code> method assigns an action the the scope named <code>AddToCart</code>.</li>
+            </ul>
+
+            <p>Since there is little value in adding items to our cart if we can't view them, we will make <code>cart.html</code> dynamic. Create a new controller, <code>CartController.cs</code>.</p>
+
+            <pre class="prettyprint">
+using System.Linq;
+
+namespace Acme.Client
+{
+    public class CartController : Acute.Controller
+    {
+        private readonly CartService _cartService;
+
+        public CartController(CartService cartService)
+        {
+            _cartService = cartService;
+        }
+
+        public override void Control(dynamic scope)
+        {
+            scope.CartIsEmpty = !_cartService.ProductsInCart.Any(); 
+
+            scope.ProductQuantities = _cartService.ProductsInCart
+                .Select(x =&gt; new {Name = x.Key, Quantity = x.Value})
+                .ToList();
+
+        }
+
+    }
+}
+					  </pre>
+
+            <p>The <code>CartController</code> also accepts a <code>CartService</code> in it's constructor, and it uses it to provide <code>CartIsEmpty</code> and <code>ProductQuantities</code> members to the scope.</p>
+            <p><span class="label label-info">Interesting:</span> The use of an anonymous-type in for the <code>ProductQuantities</code>. When it is only the HTML-template (which gives you no compile-time type-verification anyway), anonymous types can be a very handy way to reduce 'class-pollution'. </p>
+
+            <p><code>cart.html</code> will be modified as so:</p>
+
+            <pre class="prettyprint">
+
+&lt;h2&gt;Shopping Cart&lt;/h2&gt;
+
+&lt;div acute-repeat="productQuantity in ProductQuantities"&gt;
+    &lt;p&gt;{{productQuantity.Quantity}} x {{productQuantity.Name}}&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div acute-show="CartIsEmpty"&gt;
+    &lt;p&gt;You have nothing in your cart...&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;a href="#/products"&gt;Continue shopping&lt;/a&gt;
+					  </pre>
+
+            <p>This now uses the <code>acute-repeat</code> directive to bind to the ProductQuantities collection (using the <code>Quantity</code> and <code>Name</code> properties of the anonymous-type used in the controller.</p>
+            <p>It also introduces the <a href="directives.html#show">acute-show</a> directive.</p>
+
+            <p>The final step is to modify <code>AcmeApp.cs</code> to register the <code>CartService</code> and associate the <code>CartController</code> with the appropriate route:</p>
+
+            <pre class="prettyprint">
+using Acute;
+
+namespace Acme.Client
+{
+    public class AcmeApp : Acute.App
+    {
+        public AcmeApp()
+        {
+           Service&lt;CartService&gt;(); 
+        }
+
+        protected override void ConfigureRoutes(RouteProvider routeProvider)
+        {
+            routeProvider.When("/cart", new RouteConfig&lt;CartController&gt; {TemplateUrl = "cart.html"});
+            routeProvider.Otherwise(new RouteConfig&lt;ProductsController&gt; {TemplateUrl = "products.html"});
+        }
+    }
+}
+					  </pre>
+
+            <p>Running the application now, you should see a 'buy' button below each product. Clicking one will add the chosen product to your cart.</p>
+
+        </div>
+
+        <div id="http" class="walk-through-step">
+            <h3>Get data via HTTP</h3>
+
+            <p>While useful for demos, generally we don't just create our data on the client. We would usually make a request to the server. This is where the <code>IHttpService</code> comes into play.</p>
+
+            <p>We will create a web-service which our client will consume. We will use Microsoft's <a href="http://www.asp.net/web-api">Web API</a>.</p>
+
+            <p>Create two classes in the <code>Acme.Web</code> project. In the <code>Models</code> folder create a class named <code>Product</code>: </p>
+            <pre class="prettyprint">
+namespace Acme.Web.Models
+{
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+    }
+}
+</pre>
+
+            <p>And in the <code>Controllers</code> folder create a class, <code>ProductsController</code>:</p>
+
+            <pre class="prettyprint">
+using System.Collections.Generic;
+using System.Web.Http;
+using Acme.Web.Models;
+
+namespace Acme.Web.Controllers
+{
+    public class ProductsController : ApiController
+    {
+
+        [HttpGet]
+        public IEnumerable&lt;Product&gt; GetAllProducts()
+        {
+            return new[]
+            {
+                new Product
+                {
+                    Id = 1,
+                    Name = "Giant Rubber-Band",
+                    Description = "Perfect for tripping Road Runners",
+                    Price = 0.99m
+                },
+                new Product
+                {
+                    Id = 2,
+                    Name = "Earthquake Pills",
+                    Description = "Why wait? Make your own earthquakes - loads of fun!",
+                    Price = 10.00m
+                }
+            };
+        }
+    }
+}
+</pre>
+
+            <p>Yes, we now have <code>Product</code> and <code>ProductController</code> classes in both the client and server projects. For the controllers, this is fine: we are using MVC frameworks both client-side and server-side. For the Product model, if you dislike the idea of having the class in both projects, you could define the class in one, and set up a <a href="http://blogs.msdn.com/b/saraford/archive/2008/11/26/did-you-know-how-to-add-a-linked-item-to-a-project-365.aspx">linked-file</a> in the other.</p>
+
+            <p>The only other thing we have to modify in the web project, is to modify <code>WebApiConfig.cs</code>: </p>
+
+            <pre class="prettyprint">
+using System.Net.Http.Headers;
+using System.Web.Http;
+
+namespace Acme.Web
+{
+    public static class WebApiConfig
+    {
+        public static void Register(HttpConfiguration config)
+        {
+            //return json by default
+            config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html") );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+        }
+    }
+}
+</pre>
+
+            <p>We added the line commented with 'return json by default'. And it does just that. Without it, XML serialization would be used unless specified by the request.</p>
+
+            <p>Now we have a web-service. To consume it, we create a class <code>ProductService</code> in the <code>Acme.Client</code> project.</p>
+
+            <pre class="prettyprint">
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Acute.Services;
+
+namespace Acme.Client
+{
+    public class ProductService
+    {
+        private readonly IHttp _http;
+
+        public ProductService(IHttp http)
+        {
+            _http = http;
+        }
+
+        public Task&lt;IEnumerable&lt;Product&gt;&gt; GetAllProducts()
+        {
+            return _http.GetAsync("/api/products")
+                .ContinueWith(result =&gt; result.Result.DataAs&lt;IEnumerable&lt;Product&gt;&gt;());
+        }
+    }
+}
+					  </pre>
+
+            <p>The <code>ProductService</code> accepts an <a href="services.html#http">IHttp</a> as a constructor parameter.</p>
+
+            <p><span class="label label-info">Interesting:</span> The invocation of the <code>IHttp.GetAsync()</code> method in <code>GetAllProducts()</code> is an example of making an asynchronous call.  <code>GetAsync()</code> returns a <a href="http://msdn.microsoft.com/en-us/library/vstudio/system.threading.tasks.task">Task</a>.</p>
+
+            <p>The final step is to make the <code>ProductsController</code> (the client-side one) consume the <code>ProductService</code>.</p>
+
+            <pre class="prettyprint">
+using System;
+
+namespace Acme.Client
+{
+    public class ProductsController : Acute.Controller
+    {
+        private readonly CartService _cartService;
+        private readonly ProductService _productService;
+
+        public ProductsController(CartService cartService, ProductService productService)
+        {
+            _cartService = cartService;
+            _productService = productService;
+        }
+
+        public override void Control(dynamic scope)
+        {
+            _productService.GetAllProducts()
+                .ContinueWith(task =&gt; scope.Products = task.Result);
+
+            scope.AddToCart = (Action&lt;string&gt;)(productName =&gt; _cartService.AddToCart(productName));
+
+        }
+    }
+}
+</pre>
+
+            <p>And to register the <code>ProductService</code> in <code>AcmeApp</code>.</p>
+            <pre class="prettyprint">
+using Acute;
+
+namespace Acme.Client
+{
+    public class AcmeApp : Acute.App
+    {
+        public AcmeApp()
+        {
+           Service&lt;CartService&gt;(); 
+           Service&lt;ProductService&gt;(); 
+        }
+
+        protected override void ConfigureRoutes(RouteProvider routeProvider)
+        {
+            routeProvider.When("/cart", new RouteConfig&lt;CartController&gt; {TemplateUrl = "cart.html"});
+            routeProvider.Otherwise(new RouteConfig&lt;ProductsController&gt; {TemplateUrl = "products.html"});
+        }
+    }
+}
+</pre>
+
+            <p>Hopefully this walk-through has shown you how to start an Acute project, and introduced a few of the basic pieces.</p>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        loadNavbar('learn');
+        scrollSpy('#contents-menu', 90);
+    });
+
+    trackPageView();
+</script>

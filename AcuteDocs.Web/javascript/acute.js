@@ -6669,7 +6669,7 @@ else {
     }
 })(this);
 /**
- * @license AngularJS v1.2.15-build.local+sha.1a03719
+ * @license AngularJS v1.2.15-build.local+sha.1de8102
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -6738,7 +6738,7 @@ function minErr(module) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.2.15-build.local+sha.1a03719/' +
+    message = message + '\nhttp://errors.angularjs.org/1.2.15-build.local+sha.1de8102/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i-2) + '=' +
@@ -8550,7 +8550,7 @@ function setupModuleLoader(window) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.2.15-build.local+sha.1a03719',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.2.15-build.local+sha.1de8102',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 2,
   dot: 15,
@@ -8625,7 +8625,7 @@ function publishExternalAPI(angular){
             ngIf: ngIfDirective,
             acuteInclude: ngIncludeDirective,
             ngInit: ngInitDirective,
-            ngNonBindable: ngNonBindableDirective,
+            acuteIgnore: ngNonBindableDirective,
             ngPluralize: ngPluralizeDirective,
             acuteRepeat: ngRepeatDirective,
             acuteShow: ngShowDirective,
@@ -27721,7 +27721,7 @@ var styleDirective = valueFn({
 
 !angular.$$csp() && angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.acute-hide{display:none !important;}ng\\:form{display:block;}.ng-animate-block-transitions{transition:0s all!important;-webkit-transition:0s all!important;}</style>');
 /**
- * @license AngularJS v1.2.15-build.local+sha.1a03719
+ * @license AngularJS v1.2.15-build.local+sha.1de8102
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -28643,7 +28643,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
 })(window, window.angular);
 /**
- * @license AngularJS v1.2.15-build.local+sha.1a03719
+ * @license AngularJS v1.2.15-build.local+sha.1de8102
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
