@@ -8,6 +8,7 @@
 	// AcuteDocs.Client.App
 	var $AcuteDocs_Client_App = function() {
 		Acute.App.call(this);
+		this.service($AcuteDocs_Client_Page).call(this);
 	};
 	$AcuteDocs_Client_App.__typeName = 'AcuteDocs.Client.App';
 	global.AcuteDocs.Client.App = $AcuteDocs_Client_App;
@@ -38,8 +39,9 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// AcuteDocs.Client.Page
 	var $AcuteDocs_Client_Page = function() {
+		this.$_currentNavBarItem = 0;
 		this.$1$TitleField = null;
-		this.$1$CurrentNavBarItemField = 0;
+		this.CurrentNavBarItemScriptName = null;
 	};
 	$AcuteDocs_Client_Page.__typeName = 'AcuteDocs.Client.Page';
 	global.AcuteDocs.Client.Page = $AcuteDocs_Client_Page;
@@ -64,21 +66,22 @@
 	ss.initClass($AcuteDocs_Client_App, $asm, {
 		configureRoutes: function(routeProvider) {
 			var $t1 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_SetupController]))();
-			$t1.set_templateUrl('setup.html');
-			routeProvider.when('setup', $t1);
+			$t1.set_templateUrl('templates/setup.html');
+			routeProvider.when('/setup', $t1);
 			var $t2 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_HomeController]))();
-			$t2.set_templateUrl('home.html');
+			$t2.set_templateUrl('templates/home.html');
 			routeProvider.otherwise($t2);
 		}
 	}, Acute.App);
 	ss.initClass($AcuteDocs_Client_HomeController, $asm, {
 		control: function(scope) {
 			this.$_page.set_Title('Acute');
+			this.$_page.set_CurrentNavBarItem(0);
 		}
 	}, Acute.Controller);
 	ss.initClass($AcuteDocs_Client_NavBarController, $asm, {
 		control: function(scope) {
-			scope.Setup = this.$_page.get_CurrentNavBarItem() === 1;
+			scope.Page = this.$_page;
 		}
 	}, Acute.Controller);
 	ss.initEnum($AcuteDocs_Client_NavBarItem, $asm, { Home: 0, Setup: 1 });
@@ -90,18 +93,18 @@
 			this.$1$TitleField = value;
 		},
 		get_CurrentNavBarItem: function() {
-			return this.$1$CurrentNavBarItemField;
+			return this.$_currentNavBarItem;
 		},
 		set_CurrentNavBarItem: function(value) {
-			this.$1$CurrentNavBarItemField = value;
-		},
-		get_CurrentNavBarItemScriptName: function() {
-			switch (this.get_CurrentNavBarItem()) {
+			this.$_currentNavBarItem = value;
+			switch (value) {
 				case 0: {
-					return 'home';
+					this.CurrentNavBarItemScriptName = 'home';
+					break;
 				}
 				case 1: {
-					return 'setup';
+					this.CurrentNavBarItemScriptName = 'setup';
+					break;
 				}
 				default: {
 					throw new ss.Exception('Unexpected nav-bar item');
@@ -117,6 +120,7 @@
 	ss.initClass($AcuteDocs_Client_SetupController, $asm, {
 		control: function(scope) {
 			this.$_page.set_Title('Setup - Acute');
+			this.$_page.set_CurrentNavBarItem(1);
 		}
 	}, Acute.Controller);
 	ss.setMetadata($AcuteDocs_Client_App, { members: [{ name: '.ctor', type: 1, params: [] }] });
