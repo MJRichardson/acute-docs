@@ -130,6 +130,7 @@
     <Content Include="images\walk-through-solution-project-dependencies.png" />
     <Content Include="index.html" />
     <Content Include="stylesheets\acute-doc.css" />
+    <Content Include="templates\concepts.html" />
     <Content Include="templates\home.html" />
     <Content Include="templates\navbar.html" />
     <Content Include="templates\setup.html" />

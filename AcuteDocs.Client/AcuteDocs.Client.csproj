@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="ConceptsController.cs" />
     <Compile Include="HomeController.cs" />
     <Compile Include="NavBarController.cs" />
     <Compile Include="NavBarItem.cs" />

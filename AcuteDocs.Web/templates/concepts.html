@@ -1,0 +1,157 @@
+﻿<div class="row">
+    <!-- scrollspy nav -->
+    <div class="col-md-3">
+        <div id="contents-menu">
+            <ul class="nav nav-pills nav-stacked">
+                <li><a href="#controllers">Controllers</a></li>
+                <li><a href="#templates">Templates</a></li>
+                <li><a href="#directives">Directives</a></li>
+                <li><a href="#expressions">Expressions</a></li>
+                <li><a href="#filters">Filters</a></li>
+                <li><a href="#forms">Forms</a></li>
+                <li><a href="#routing">Routing</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-9" acute-ignore>
+        <div id="page-header" class="page-header">
+            <h1>Concepts</h1>
+        </div>
+
+
+        <div id="controllers" class="concept">
+            <h3>Controllers</h3>
+            <p>MVC components in Acute:</p>
+            <ul>
+                <li>Model - The functions and properties exposed by the scope.</li>
+                <li>View - The HTML template. </li>
+                <li><em>Controller</em> - The controller is responsible for adding data and behaviour to the model (the scope object).</li>
+            </ul>
+
+            <p>A controller is created by inheriting from <code>Acute.Controller</code>.</p>
+        </div>
+
+        <div id="templates" class="concept">
+            <h3>Templates</h3>
+            <p>In Acute, templates are HTML.</p>
+
+            <p>Acute combines the template with the model to render the view to the browser.</p>
+
+            <p>When writing a template, you interact with the model using:</p>
+            <ul>
+                <li><a href="#directives">Directives</a></li>
+                <li><a href="#expressions">Expressions</a></li>
+                <li><a href="#filters">Filters</a></li>
+                <li><a href="#forms">Forms</a></li>
+            </ul>
+            <p>The following snippet shows a template using directives and expressions:</p>
+
+            <pre class="prettyprint">
+&lt;html acute-app="Smurfs.App"&gt;
+    
+    &lt;!-- Body tag augmented with controller directive  --&gt;
+    &lt;body acute-controller="Smurfs.SmurfController"&gt;
+        
+        &lt;!--repeat directive--&gt;
+        &lt;div acute-repeat="smurf in Smurfs"&gt;
+            &lt;!-- expression using '{{}}' markup --&gt;
+            &lt;p&gt;{{smurf.Name}}&lt;/p&gt; 
+        &lt;/div&gt;
+
+        &lt;script src="acute.js"&gt;&lt;/script&gt;
+        &lt;script src="Smurfs.js"&gt;&lt;/script&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </div>
+
+        <div id="directives" class="concept">
+            <h3>Directives</h3>
+
+            <p>Directives are attributes on a DOM element that tell Acute's HTML compiler to attach a specified behaviour, or even transform the element and its children.</p>
+
+            <p>See the <a href="directives.html">Directives library</a> documentation for a list of the available directives.</p>
+        </div>
+
+        <div id="expressions" class="concept">
+            <h3>Expressions</h3>
+
+            <p>Expressions are code snippets used in templates to expose values from the model. They are placed inside braces, i.e. <code>{{ expression }}</code>.  </p>
+
+        </div>
+
+        <div id="filters" class="concept">
+            <h3>Filters</h3>
+
+            <p>Filters are used in templates to format the value of an expression for display to the user.</p>
+
+            <p>For example, the markup <code>{{86 | currency}}</code> formats the number 86 as a currency. The resulting value displayed is <code>$86.00</code>.</p>
+
+            <p>Filters can be applied to the result of another filter. This is called "chaining" and uses the following syntax:</p>
+            <pre>{{ expression | filter1 | filter2 | ... }}</pre>
+
+            <p>Filters may have arguments. The syntax for this is</p>
+            <pre>{{ expression | filter:argument1:argument2:... }}</pre>
+
+            <p>See the <a href="filters.html">Filters library</a> documention for a list of available filters.</p>
+        </div>
+
+        <div id="forms" class="concept">
+            <h3>Forms</h3>
+            <p>A HTML form is a way of grouping related user-input (<code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, etc) controls.</p>
+
+            <h4>Binding</h4>
+            <p>The key directive in data-binding for forms is <a href="directives.html#bind">acute-bind</a>. It provides the two-way data-binding by synchronizing the model to the view, as well as view to the model.</p>
+
+            <h4>Validation</h4>
+            <p>Acute provides some basic validation directives for common HTML5 input types (text, number, url, email, radio, checkbox): required, pattern, minlength, maxlength, min, max.  </p>
+
+            <h3>CSS Classes</h3>
+            <p>To allow styling, the following classes are added to forms and input controls: </p>
+            <ul>
+                <li>acute-valid</li>
+                <li>acute-invalid</li>
+                <li>acute-pristine</li>
+                <li>acute-dirty</li>
+            </ul>
+
+            <h3>Example</h3>
+            <p>The following example uses the CSS classes to display the validity of each form control. Both <code>User.Name</code> and <code>User.Email</code> are required, but are rendered with a red background only when they are dirty and invalid. This ensures that the user is not distracted with an error until after interacting with the control, and failing to satisfy its validity.   </p>
+            <pre class="prettyprint">
+&lt;div acute-controller="Namespace.Controller"&gt;
+  &lt;form novalidate class="css-form"&gt;
+    Name:
+      &lt;input type="text" acute-bind="User.Name" required /&gt;&lt;br /&gt;
+    E-mail: &lt;input type="email" acute-bind="User.Email" required /&gt;&lt;br /&gt;
+  &lt;/form&gt;
+&lt;/div&gt;
+
+&lt;style type="text/css"&gt;
+  .css-form input.acute-invalid.acute-dirty {
+    background-color: #FA787E;
+  }
+
+  .css-form input.acute-valid.acute-dirty {
+    background-color: #78FA89;
+  }
+&lt;/style&gt;
+</pre>
+        </div>
+
+        <div id="routing" class="concept">
+            <h3>Routing</h3>
+            <p>Routing is used to link URL's to controllers and views. </p>
+            <p>Routes are configured by overriding the <code>ConfigureRoutes()</code> method of <code>Acute.App</code>. See <a href="route-provider.html">RouteProvider</a> for details of configuring routes.</p>
+
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        scrollSpy('#contents-menu', 80);
+    });
+</script>
+

@@ -13,6 +13,15 @@
 	$AcuteDocs_Client_App.__typeName = 'AcuteDocs.Client.App';
 	global.AcuteDocs.Client.App = $AcuteDocs_Client_App;
 	////////////////////////////////////////////////////////////////////////////////
+	// AcuteDocs.Client.ConceptsController
+	var $AcuteDocs_Client_ConceptsController = function(page) {
+		this.$_page = null;
+		Acute.Controller.call(this);
+		this.$_page = page;
+	};
+	$AcuteDocs_Client_ConceptsController.__typeName = 'AcuteDocs.Client.ConceptsController';
+	global.AcuteDocs.Client.ConceptsController = $AcuteDocs_Client_ConceptsController;
+	////////////////////////////////////////////////////////////////////////////////
 	// AcuteDocs.Client.HomeController
 	var $AcuteDocs_Client_HomeController = function(page) {
 		this.$_page = null;
@@ -77,14 +86,23 @@
 			var $t1 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_SetupController]))();
 			$t1.set_templateUrl('templates/setup.html');
 			routeProvider.when('/setup', $t1);
-			var $t2 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_WalkThroughController]))();
-			$t2.set_templateUrl('templates/walk-through.html');
-			routeProvider.when('/walk-through', $t2);
-			var $t3 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_HomeController]))();
-			$t3.set_templateUrl('templates/home.html');
-			routeProvider.otherwise($t3);
+			var $t2 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_ConceptsController]))();
+			$t2.set_templateUrl('templates/concepts.html');
+			routeProvider.when('/concepts', $t2);
+			var $t3 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_WalkThroughController]))();
+			$t3.set_templateUrl('templates/walk-through.html');
+			routeProvider.when('/walk-through', $t3);
+			var $t4 = new (ss.makeGenericType(Acute.RouteConfig$1, [$AcuteDocs_Client_HomeController]))();
+			$t4.set_templateUrl('templates/home.html');
+			routeProvider.otherwise($t4);
 		}
 	}, Acute.App);
+	ss.initClass($AcuteDocs_Client_ConceptsController, $asm, {
+		control: function(scope) {
+			this.$_page.set_Title('Concepts - Acute');
+			this.$_page.set_CurrentNavBarItem(2);
+		}
+	}, Acute.Controller);
 	ss.initClass($AcuteDocs_Client_HomeController, $asm, {
 		control: function(scope) {
 			this.$_page.set_Title('Acute');
@@ -146,6 +164,7 @@
 		}
 	}, Acute.Controller);
 	ss.setMetadata($AcuteDocs_Client_App, { members: [{ name: '.ctor', type: 1, params: [] }] });
+	ss.setMetadata($AcuteDocs_Client_ConceptsController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_HomeController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_NavBarController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_Page, { members: [{ name: '.ctor', type: 1, params: [] }] });
