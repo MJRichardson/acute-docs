@@ -7,6 +7,7 @@ namespace AcuteDocs.Client
         public App()
         {
            Service<Page>(); 
+           Service<Versions>(); 
         }
 
         protected override void ConfigureRoutes(RouteProvider routeProvider)

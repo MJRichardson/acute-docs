@@ -9,6 +9,7 @@
 	var $AcuteDocs_Client_App = function() {
 		Acute.App.call(this);
 		this.service($AcuteDocs_Client_Page).call(this);
+		this.service($AcuteDocs_Client_Versions).call(this);
 	};
 	$AcuteDocs_Client_App.__typeName = 'AcuteDocs.Client.App';
 	global.AcuteDocs.Client.App = $AcuteDocs_Client_App;
@@ -32,10 +33,12 @@
 	global.AcuteDocs.Client.HomeController = $AcuteDocs_Client_HomeController;
 	////////////////////////////////////////////////////////////////////////////////
 	// AcuteDocs.Client.NavBarController
-	var $AcuteDocs_Client_NavBarController = function(page) {
+	var $AcuteDocs_Client_NavBarController = function(page, versions) {
 		this.$_page = null;
+		this.$_versions = null;
 		Acute.Controller.call(this);
 		this.$_page = page;
+		this.$_versions = versions;
 	};
 	$AcuteDocs_Client_NavBarController.__typeName = 'AcuteDocs.Client.NavBarController';
 	global.AcuteDocs.Client.NavBarController = $AcuteDocs_Client_NavBarController;
@@ -49,7 +52,8 @@
 	// AcuteDocs.Client.Page
 	var $AcuteDocs_Client_Page = function() {
 		this.$_currentNavBarItem = 0;
-		this.$1$TitleField = null;
+		this.Title = null;
+		this.IsVersionSpecific = false;
 		this.CurrentNavBarItemScriptName = null;
 	};
 	$AcuteDocs_Client_Page.__typeName = 'AcuteDocs.Client.Page';
@@ -72,6 +76,13 @@
 	};
 	$AcuteDocs_Client_SetupController.__typeName = 'AcuteDocs.Client.SetupController';
 	global.AcuteDocs.Client.SetupController = $AcuteDocs_Client_SetupController;
+	////////////////////////////////////////////////////////////////////////////////
+	// AcuteDocs.Client.Versions
+	var $AcuteDocs_Client_Versions = function() {
+		this.SelectedVersion = $AcuteDocs_Client_Versions.DefaultVersion;
+	};
+	$AcuteDocs_Client_Versions.__typeName = 'AcuteDocs.Client.Versions';
+	global.AcuteDocs.Client.Versions = $AcuteDocs_Client_Versions;
 	////////////////////////////////////////////////////////////////////////////////
 	// AcuteDocs.Client.WalkThroughController
 	var $AcuteDocs_Client_WalkThroughController = function(page) {
@@ -99,33 +110,35 @@
 	}, Acute.App);
 	ss.initClass($AcuteDocs_Client_ConceptsController, $asm, {
 		control: function(scope) {
-			this.$_page.set_Title('Concepts - Acute');
-			this.$_page.set_CurrentNavBarItem(2);
+			this.$_page.SetPage('Concepts - Acute', 2, false);
 		}
 	}, Acute.Controller);
 	ss.initClass($AcuteDocs_Client_HomeController, $asm, {
 		control: function(scope) {
-			this.$_page.set_Title('Acute');
-			this.$_page.set_CurrentNavBarItem(0);
+			this.$_page.SetPage('Acute', 0, false);
 		}
 	}, Acute.Controller);
 	ss.initClass($AcuteDocs_Client_NavBarController, $asm, {
 		control: function(scope) {
 			scope.Page = this.$_page;
+			scope.Versions = this.$_versions.get_AllVersions();
+			scope.SelectedVersion = this.$_versions.SelectedVersion;
+			scope.OnVersionSelected = ss.mkdel(this, function(version) {
+				this.$_versions.SelectedVersion = version;
+			});
 		}
 	}, Acute.Controller);
 	ss.initEnum($AcuteDocs_Client_NavBarItem, $asm, { Home: 0, Setup: 1, Learn: 2 });
 	ss.initClass($AcuteDocs_Client_Page, $asm, {
-		get_Title: function() {
-			return this.$1$TitleField;
+		SetPage: function(title, currentNavBarItem, isVersionSpecific) {
+			this.Title = title;
+			this.IsVersionSpecific = isVersionSpecific;
+			this.set_$CurrentNavBarItem(currentNavBarItem);
 		},
-		set_Title: function(value) {
-			this.$1$TitleField = value;
-		},
-		get_CurrentNavBarItem: function() {
+		get_$CurrentNavBarItem: function() {
 			return this.$_currentNavBarItem;
 		},
-		set_CurrentNavBarItem: function(value) {
+		set_$CurrentNavBarItem: function(value) {
 			this.$_currentNavBarItem = value;
 			switch (value) {
 				case 0: {
@@ -153,23 +166,28 @@
 	}, Acute.Controller);
 	ss.initClass($AcuteDocs_Client_SetupController, $asm, {
 		control: function(scope) {
-			this.$_page.set_Title('Setup - Acute');
-			this.$_page.set_CurrentNavBarItem(1);
+			this.$_page.SetPage('Setup - Acute', 1, true);
 		}
 	}, Acute.Controller);
+	ss.initClass($AcuteDocs_Client_Versions, $asm, {
+		get_AllVersions: function() {
+			return ['v0.2', 'v0.1'];
+		}
+	});
 	ss.initClass($AcuteDocs_Client_WalkThroughController, $asm, {
 		control: function(scope) {
-			this.$_page.set_Title('WalkThrough - Acute');
-			this.$_page.set_CurrentNavBarItem(2);
+			this.$_page.SetPage('WalkThrough - Acute', 2, false);
 		}
 	}, Acute.Controller);
 	ss.setMetadata($AcuteDocs_Client_App, { members: [{ name: '.ctor', type: 1, params: [] }] });
 	ss.setMetadata($AcuteDocs_Client_ConceptsController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_HomeController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
-	ss.setMetadata($AcuteDocs_Client_NavBarController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
+	ss.setMetadata($AcuteDocs_Client_NavBarController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page, $AcuteDocs_Client_Versions] }] });
 	ss.setMetadata($AcuteDocs_Client_Page, { members: [{ name: '.ctor', type: 1, params: [] }] });
 	ss.setMetadata($AcuteDocs_Client_PageController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
 	ss.setMetadata($AcuteDocs_Client_SetupController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
+	ss.setMetadata($AcuteDocs_Client_Versions, { members: [{ name: '.ctor', type: 1, params: [] }] });
 	ss.setMetadata($AcuteDocs_Client_WalkThroughController, { members: [{ name: '.ctor', type: 1, params: [$AcuteDocs_Client_Page] }] });
+	$AcuteDocs_Client_Versions.DefaultVersion = 'v0.1';
 })();
 Acute.Bootstrap();

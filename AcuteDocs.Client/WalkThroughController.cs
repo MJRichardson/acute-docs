@@ -13,8 +13,7 @@ namespace AcuteDocs.Client
 
         public override void Control(dynamic scope)
         {
-            _page.Title = "WalkThrough - Acute";
-            _page.CurrentNavBarItem = NavBarItem.Learn;
+            _page.SetPage("WalkThrough - Acute", NavBarItem.Learn, false );
         }
     }
 }

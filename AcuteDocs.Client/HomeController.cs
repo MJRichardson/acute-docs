@@ -13,8 +13,7 @@ namespace AcuteDocs.Client
 
         public override void Control(dynamic scope)
         {
-            _page.Title = "Acute";
-            _page.CurrentNavBarItem = NavBarItem.Home;
+            _page.SetPage("Acute", NavBarItem.Home, false );
         }
     }
 }
