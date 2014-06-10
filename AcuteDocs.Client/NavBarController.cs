@@ -20,7 +20,11 @@ namespace AcuteDocs.Client
             scope.Versions = _versions.AllVersions;
             scope.SelectedVersion = _versions.SelectedVersion;
 
-            scope.OnVersionSelected = (Action<string>) (version => { _versions.SelectedVersion = version; });
+            scope.OnVersionSelected = (Action<string>) (version =>
+                {
+                    _versions.SelectedVersion = version;
+                    scope.SelectedVersion = version;
+                });
 
         }
 

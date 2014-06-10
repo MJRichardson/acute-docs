@@ -34,7 +34,7 @@
                     <li id="versions" class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown">{{SelectedVersion}} <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li acute-repeat="version in Versions"><a acute-click="">{{version}}</a></li>
+                            <li acute-repeat="version in Versions"><a acute-click="OnVersionSelected(version)">{{version}}</a></li>
                         </ul>
                     </li>
                 </ul>
