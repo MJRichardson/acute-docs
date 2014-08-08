@@ -4,16 +4,11 @@ namespace AcuteDocs.Client
 {
     public class SetupController : Controller
     {
-        private readonly Page _page;
 
         public SetupController(Page page)
         {
-            _page = page;
+            page.SetPage("Setup - Acute", NavBarItem.Setup, true );
         }
 
-        public override void Control(dynamic scope)
-        {
-            _page.SetPage("Setup - Acute", NavBarItem.Setup, true );
-        }
     }
 }

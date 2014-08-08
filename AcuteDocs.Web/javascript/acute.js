@@ -28878,6 +28878,21 @@ angular.module('ngCookies', ['ng']).
 		var angularServiceAttributes = ss.getAttributes(type, $Acute_Angular_$AngularServiceAttribute, false);
 		return ((angularServiceAttributes.length > 0) ? ss.cast(angularServiceAttributes[0], $Acute_Angular_$AngularServiceAttribute).get_$serviceName() : ss.getTypeFullName(type));
 	};
+	$Acute_$ReflectionExtensions.$asAngularDirectiveName = function(type) {
+		//if the directive name attribute is applied, use the name value supplied
+		var directiveNameAttributes = ss.getAttributes(type, $Acute_DirectiveNameAttribute, false);
+		if (directiveNameAttributes.length > 0) {
+			return ss.cast(directiveNameAttributes[0], $Acute_DirectiveNameAttribute).get_name();
+		}
+		//otherwise we build the directive name from the class name
+		//camel-case
+		var directiveName = $Acute_$StringUtilities.$firstCharToLower(ss.getTypeName(type));
+		//if the class name ends with 'Directive', then remove it
+		if (ss.endsWithString(directiveName, 'Directive')) {
+			directiveName = directiveName.substr(0, directiveName.length - 9);
+		}
+		return directiveName;
+	};
 	$Acute_$ReflectionExtensions.$getInstanceMethodNames = function(type) {
 		var result = [];
 		var $t1 = ss.getEnumerator(Object.keys(type.prototype));
@@ -28912,6 +28927,24 @@ angular.module('ngCookies', ['ng']).
 		return functionArrayNotation;
 	};
 	////////////////////////////////////////////////////////////////////////////////
+	// Acute.StringUtilities
+	var $Acute_$StringUtilities = function() {
+	};
+	$Acute_$StringUtilities.__typeName = 'Acute.$StringUtilities';
+	$Acute_$StringUtilities.$firstCharToLower = function(s) {
+		if (ss.isNullOrUndefined(s)) {
+			throw new ss.ArgumentException('s');
+		}
+		if (s.length === 0) {
+			return s;
+		}
+		var firstChar = String.fromCharCode(s.charCodeAt(0)).toLowerCase();
+		if (s.length === 1) {
+			return firstChar;
+		}
+		return firstChar + s.substring(1);
+	};
+	////////////////////////////////////////////////////////////////////////////////
 	// Acute.App
 	var $Acute_App = function() {
 		this.$_module = null;
@@ -28921,12 +28954,16 @@ angular.module('ngCookies', ['ng']).
 		this.service$1($Acute_Services_IHttp, $Acute_Services_Http).call(this);
 		this.service$1($Acute_Services_ILocation, $Acute_Services_Location).call(this);
 		this.service$1($Acute_Services_ICookies, $Acute_Services_Cookies).call(this);
+		this.service($Acute_Scope).call(this);
 		var $t1 = ss.getAssemblies();
 		for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 			var assembly = $t1[$t2];
 			var $t3 = ss.getAssemblyTypes(assembly);
 			for (var $t4 = 0; $t4 < $t3.length; $t4++) {
 				var type = $t3[$t4];
+				if (type.prototype instanceof $Acute_Directive) {
+					this.directive(type);
+				}
 				if (type.prototype instanceof $Acute_Controller) {
 					this.controller$1(type);
 				}
@@ -28948,85 +28985,197 @@ angular.module('ngCookies', ['ng']).
 	$Acute_App.__typeName = 'Acute.App';
 	global.Acute.App = $Acute_App;
 	////////////////////////////////////////////////////////////////////////////////
+	// Acute.BindDomAttributeToDirectiveScopeAttribute
+	var $Acute_BindDomAttributeToDirectiveScopeAttribute = function(propertyName, bindingType) {
+		$Acute_BindDomAttributeToDirectiveScopeAttribute.$ctor1.call(this, propertyName, propertyName, bindingType);
+	};
+	$Acute_BindDomAttributeToDirectiveScopeAttribute.__typeName = 'Acute.BindDomAttributeToDirectiveScopeAttribute';
+	$Acute_BindDomAttributeToDirectiveScopeAttribute.$ctor1 = function(propertyName, attributeName, bindingType) {
+		this.$2$PropertyNameField = null;
+		this.$2$AttributeNameField = null;
+		this.$2$BindingTypeField = 0;
+		this.set_propertyName(propertyName);
+		this.set_attributeName($Acute_$StringUtilities.$firstCharToLower(attributeName));
+		this.set_bindingType(bindingType);
+	};
+	global.Acute.BindDomAttributeToDirectiveScopeAttribute = $Acute_BindDomAttributeToDirectiveScopeAttribute;
+	////////////////////////////////////////////////////////////////////////////////
 	// Acute.Controller
 	var $Acute_Controller = function() {
 	};
 	$Acute_Controller.__typeName = 'Acute.Controller';
 	$Acute_Controller.$buildControllerFunction = function(type) {
-		var scopeVar = '$scope';
+		var constructorInfo = Enumerable.from(ss.getMembers(type, 1, 28)).first();
+		//todo: assert only one constructor
+		var parameterTypes = constructorInfo.params;
+		var parameterNotPresentIndex = -1;
+		var scopeParameterIndex = Enumerable.from(parameterTypes).select(function(x, i) {
+			return { Index: i, ParameterType: x };
+		}).where(function(x1) {
+			return ss.isAssignableFrom($Acute_Scope, x1.ParameterType);
+		}).select(function(x2) {
+			return x2.Index;
+		}).firstOrDefault(null, parameterNotPresentIndex);
 		var functionArrayNotation = $Acute_$ReflectionExtensions.$createFunctionArray(type);
 		var parameters = Enumerable.from(functionArrayNotation).takeExceptLast().select(function(x) {
 			return ss.cast(x, String);
-		}).select(function(x) {
-			return ss.replaceAllString(x, '.', '_');
+		}).select(function(x3) {
+			return ss.replaceAllString(x3, '.', '_');
 		}).toArray();
-		//get the constructor parameters
-		//var parameters = GlobalApi.Injector().Annotate(type.GetConstructorFunction());
-		var body = ss.formatString('var controller = new {0}({1});\n', ss.getTypeFullName(type), ss.arrayFromEnumerable(parameters).join(','));
-		body += ss.formatString('controller.{0}({1});\n', $Acute_Controller.$controlScriptName, scopeVar);
-		//and add $scope as a parameter
-		ss.insert(functionArrayNotation, ss.count(functionArrayNotation) - 1, scopeVar);
-		//and add $scope as a parameter
-		ss.add(parameters, scopeVar);
+		var body = '';
+		if (scopeParameterIndex !== parameterNotPresentIndex) {
+			body += ss.formatString('var {0} = new {1}({2});', parameters[scopeParameterIndex], ss.getTypeFullName($Acute_Scope), $Acute_Angular_$AngularServices.$scope);
+		}
+		body += ss.formatString('var controller = new {0}({1});\n', ss.getTypeFullName(type), ss.arrayFromEnumerable(parameters).join(','));
+		if (scopeParameterIndex !== parameterNotPresentIndex) {
+			ss.setItem(functionArrayNotation, scopeParameterIndex, $Acute_Angular_$AngularServices.$scope);
+			parameters[scopeParameterIndex] = $Acute_Angular_$AngularServices.$scope;
+		}
 		var modifiedFunc = new Function(parameters, body);
 		ss.setItem(functionArrayNotation, parameters.length, modifiedFunc);
 		return functionArrayNotation;
-		//
-		//             string body = "";
-		//
-		//             const string scopeVar = "$scope";
-		//
-		//             
-		//
-		//             
-		//
-		//             // takes method into $scope, binding "$scope" to "this"
-		//
-		//             foreach(string funcname in type.GetInstanceMethodNames())
-		//
-		//             {
-		//
-		//             body += String.Format("{2}.{1} = {0}.prototype.{1}.bind({2});\r\n",type.FullName,funcname,scopeVar);
-		//
-		//             }
-		//
-		//             
-		//
-		//             // put call at the end so that methods are defined first
-		//
-		//             body+=String.Format("{0}.apply({1},arguments);\r\n",type.FullName,scopeVar);
-		//
-		//             
-		//
-		//             //get the constructor parameters
-		//
-		//             var parameters = GlobalApi.Injector().Annotate(type.GetConstructorFunction());
-		//
-		//             
-		//
-		//             var functionArrayNotation = type.CreateFunctionArray();
-		//
-		//             //and add $scope as a parameter
-		//
-		//             functionArrayNotation.Insert(functionArrayNotation.Count - 1, scopeVar );
-		//
-		//             
-		//
-		//             //and add $scope as a parameter
-		//
-		//             parameters.Add(scopeVar);
-		//
-		//             
-		//
-		//             var modifiedFunc = ReflectionExtensions.CreateNewFunction(parameters,body);
-		//
-		//             functionArrayNotation[parameters.Count] = modifiedFunc;
-		//
-		//             
-		//
-		//             return functionArrayNotation;
 	};
 	global.Acute.Controller = $Acute_Controller;
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.Directive
+	var $Acute_Directive = function() {
+	};
+	$Acute_Directive.__typeName = 'Acute.Directive';
+	$Acute_Directive.definition = function(directiveTypeName) {
+		var directiveType = ss.getType(directiveTypeName);
+		var definition = {};
+		//if (Template != null)
+		//    definition["template"] = Template;
+		//else if (TemplateUrl != null)
+		//    definition["templateUrl"] = TemplateUrl;
+		var scope = {};
+		var $t1 = ss.getAttributes(directiveType, $Acute_BindDomAttributeToDirectiveScopeAttribute, false).map(function(x) {
+			return ss.cast(x, $Acute_BindDomAttributeToDirectiveScopeAttribute);
+		});
+		for (var $t2 = 0; $t2 < $t1.length; $t2++) {
+			var domAttributeBinding = $t1[$t2];
+			var angularBindingMagicPrefix;
+			switch (domAttributeBinding.get_bindingType()) {
+				case 0: {
+					angularBindingMagicPrefix = '=';
+					break;
+				}
+				case 1: {
+					angularBindingMagicPrefix = '@';
+					break;
+				}
+				default: {
+					throw new ss.ArgumentOutOfRangeException();
+				}
+			}
+			scope[domAttributeBinding.get_propertyName()] = angularBindingMagicPrefix + domAttributeBinding.get_attributeName();
+		}
+		definition['scope'] = scope;
+		var restrict = '';
+		var domTypeAttribute = Enumerable.from(ss.getAttributes(directiveType, $Acute_DirectiveDomTypesAttribute, false)).select(function(x) {
+			return ss.cast(x, $Acute_DirectiveDomTypesAttribute);
+		}).firstOrDefault(null, ss.getDefaultValue($Acute_DirectiveDomTypesAttribute));
+		if (ss.isValue(domTypeAttribute)) {
+			if ((1 & domTypeAttribute.get_domTypes()) !== 0) {
+				restrict += 'A';
+			}
+			if ((2 & domTypeAttribute.get_domTypes()) !== 0) {
+				restrict += 'E';
+			}
+			if ((4 & domTypeAttribute.get_domTypes()) !== 0) {
+				restrict += 'C';
+			}
+		}
+		definition['restrict'] = restrict;
+		return definition;
+	};
+	$Acute_Directive.$buildDirectiveFunction = function(type) {
+		var constructorInfo = Enumerable.from(ss.getMembers(type, 1, 28)).first();
+		//todo: assert only one constructor
+		var parameterTypes = constructorInfo.params;
+		var parameterNotPresentIndex = -1;
+		var scopeParameterIndex = Enumerable.from(parameterTypes).select(function(x, i) {
+			return { Index: i, ParameterType: x };
+		}).where(function(x1) {
+			return ss.isAssignableFrom($Acute_Scope, x1.ParameterType);
+		}).select(function(x2) {
+			return x2.Index;
+		}).firstOrDefault(null, parameterNotPresentIndex);
+		var directiveParameterIndices = Enumerable.from(parameterTypes).select(function(x3, i1) {
+			return { Index: i1, ParameterType: x3 };
+		}).where(function(x4) {
+			return ss.isAssignableFrom($Acute_Directive, x4.ParameterType);
+		}).select(function(x5) {
+			return x5.Index;
+		}).toArray();
+		var functionArrayNotation = $Acute_$ReflectionExtensions.$createFunctionArray(type);
+		var parameters = Enumerable.from(functionArrayNotation).takeExceptLast().select(function(x) {
+			return ss.cast(x, String);
+		}).select(function(x6) {
+			return ss.replaceAllString(x6, '.', '_');
+		}).toArray();
+		functionArrayNotation = Enumerable.from(functionArrayNotation).toArray().filter(function(x7, i2, X) {
+			return scopeParameterIndex !== i2 && !ss.contains(directiveParameterIndices, i2);
+		});
+		var injectableParameters = [];
+		//get all parameters which can be injected into the directive's constructor  
+		//i.e. not scope, directives, or the function itself
+		for (var i3 = 0; i3 < ss.count(functionArrayNotation) - 1; i3++) {
+			if (i3 !== scopeParameterIndex && !ss.contains(directiveParameterIndices, i3)) {
+				ss.add(injectableParameters, parameters[i3]);
+			}
+		}
+		ss.add(injectableParameters, $Acute_Angular_$AngularServices.$compile);
+		ss.insert(functionArrayNotation, ss.count(functionArrayNotation) - 1, $Acute_Angular_$AngularServices.$compile);
+		var bodyBuilder = (new ss.StringBuilder()).appendLine(ss.formatString("var directiveDefinition = {0}.{1}('{2}');", ss.getTypeFullName($Acute_Directive), $Acute_Directive.$definitionScriptName, ss.getTypeFullName(type)));
+		if (Enumerable.from(directiveParameterIndices).any()) {
+			bodyBuilder.appendLine('directiveDefinition.require = [' + ss.arrayFromEnumerable(Enumerable.from(directiveParameterIndices).select(function(i4) {
+				return ss.formatString("'^{0}'", $Acute_$ReflectionExtensions.$asAngularDirectiveName(parameterTypes[i4]));
+			})).join(',')).appendLine('];');
+		}
+		bodyBuilder.appendLine('var _directive;').appendLine('directiveDefinition.compile = function(){').appendLine('return {').appendLine('pre: function(scope, element, attributes, controllers) {');
+		if (scopeParameterIndex !== parameterNotPresentIndex) {
+			bodyBuilder.appendLine(ss.formatString('var {0} = new {1}(scope);', parameters[scopeParameterIndex], ss.getTypeFullName($Acute_Scope)));
+		}
+		for (var i5 = 0; i5 < directiveParameterIndices.length; i5++) {
+			var directiveParameterIndex = directiveParameterIndices[i5];
+			bodyBuilder.appendLine(ss.formatString('var {0} = controllers[{1}].directive()', parameters[directiveParameterIndex], i5));
+		}
+		bodyBuilder.appendLine(ss.formatString('_directive = new {0}({1});', ss.getTypeFullName(type), ss.arrayFromEnumerable(parameters).join(',')));
+		bodyBuilder.appendLine('},').appendLine('post: function(scope, element ) {').appendLine(ss.formatString('_directive.{0}({1}, element, scope);', $Acute_Directive.$compileTemplateScriptName, $Acute_Angular_$AngularServices.$compile)).appendLine('}').appendLine('}').appendLine('};').appendLine('directiveDefinition.controller = function($scope) {').appendLine('this.directive = function(){return _directive;};').appendLine('};').appendLine('return directiveDefinition;');
+		var modifiedFunc = new Function(injectableParameters, bodyBuilder.toString());
+		ss.setItem(functionArrayNotation, ss.count(functionArrayNotation) - 1, modifiedFunc);
+		return functionArrayNotation;
+	};
+	global.Acute.Directive = $Acute_Directive;
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.DirectiveDomTypes
+	var $Acute_DirectiveDomTypes = function() {
+	};
+	$Acute_DirectiveDomTypes.__typeName = 'Acute.DirectiveDomTypes';
+	global.Acute.DirectiveDomTypes = $Acute_DirectiveDomTypes;
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.DirectiveDomTypesAttribute
+	var $Acute_DirectiveDomTypesAttribute = function(domTypes) {
+		this.$2$DomTypesField = 0;
+		this.set_domTypes(domTypes);
+	};
+	$Acute_DirectiveDomTypesAttribute.__typeName = 'Acute.DirectiveDomTypesAttribute';
+	global.Acute.DirectiveDomTypesAttribute = $Acute_DirectiveDomTypesAttribute;
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.DirectiveNameAttribute
+	var $Acute_DirectiveNameAttribute = function(name) {
+		this.$2$NameField = null;
+		this.set_name(name);
+	};
+	$Acute_DirectiveNameAttribute.__typeName = 'Acute.DirectiveNameAttribute';
+	global.Acute.DirectiveNameAttribute = $Acute_DirectiveNameAttribute;
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.DomAttributeBindingType
+	var $Acute_DomAttributeBindingType = function() {
+	};
+	$Acute_DomAttributeBindingType.__typeName = 'Acute.DomAttributeBindingType';
+	global.Acute.DomAttributeBindingType = $Acute_DomAttributeBindingType;
 	////////////////////////////////////////////////////////////////////////////////
 	// Acute.RouteConfig
 	var $Acute_RouteConfig = function() {
@@ -29061,12 +29210,30 @@ angular.module('ngCookies', ['ng']).
 	$Acute_RouteProvider.__typeName = 'Acute.RouteProvider';
 	global.Acute.RouteProvider = $Acute_RouteProvider;
 	////////////////////////////////////////////////////////////////////////////////
+	// Acute.Scope
+	var $Acute_Scope = function(scope) {
+		this._scope = null;
+		this._scope = scope;
+	};
+	$Acute_Scope.__typeName = 'Acute.Scope';
+	global.Acute.Scope = $Acute_Scope;
+	////////////////////////////////////////////////////////////////////////////////
 	// Acute.Angular.AngularServiceAttribute
 	var $Acute_Angular_$AngularServiceAttribute = function(serviceName) {
 		this.$2$ServiceNameField = null;
 		this.set_$serviceName(serviceName);
 	};
 	$Acute_Angular_$AngularServiceAttribute.__typeName = 'Acute.Angular.$AngularServiceAttribute';
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.Angular.AngularServices
+	var $Acute_Angular_$AngularServices = function() {
+	};
+	$Acute_Angular_$AngularServices.__typeName = 'Acute.Angular.$AngularServices';
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.Angular.Compiler
+	var $Acute_Angular_$Compiler = function() {
+	};
+	$Acute_Angular_$Compiler.__typeName = 'Acute.Angular.$Compiler';
 	////////////////////////////////////////////////////////////////////////////////
 	// Acute.Angular.Cookies
 	var $Acute_Angular_$Cookies = function() {
@@ -29092,6 +29259,11 @@ angular.module('ngCookies', ['ng']).
 	var $Acute_Angular_$RouteProvider = function() {
 	};
 	$Acute_Angular_$RouteProvider.__typeName = 'Acute.Angular.$RouteProvider';
+	////////////////////////////////////////////////////////////////////////////////
+	// Acute.Angular.Scope
+	var $Acute_Angular_$Scope = function() {
+	};
+	$Acute_Angular_$Scope.__typeName = 'Acute.Angular.$Scope';
 	////////////////////////////////////////////////////////////////////////////////
 	// Acute.Services.Cookies
 	var $Acute_Services_Cookies = function(cookieStore, cookies) {
@@ -29215,6 +29387,7 @@ angular.module('ngCookies', ['ng']).
 	$System_Net_Http_HttpStatusCode.__typeName = 'System.Net.Http.HttpStatusCode';
 	global.System.Net.Http.HttpStatusCode = $System_Net_Http_HttpStatusCode;
 	ss.initClass($Acute_$ReflectionExtensions, $asm, {});
+	ss.initClass($Acute_$StringUtilities, $asm, {});
 	ss.initClass($Acute_App, $asm, {
 		controller: function(T) {
 			return function() {
@@ -29224,6 +29397,10 @@ angular.module('ngCookies', ['ng']).
 		controller$1: function(controllerType) {
 			var func = $Acute_Controller.$buildControllerFunction(controllerType);
 			this.$_module.controller($Acute_$ReflectionExtensions.$asAngularServiceName(controllerType), func);
+		},
+		directive: function(directiveType) {
+			var func = $Acute_Directive.$buildDirectiveFunction(directiveType);
+			this.$_module.directive($Acute_$ReflectionExtensions.$asAngularDirectiveName(directiveType), func);
 		},
 		service: function(T) {
 			return function() {
@@ -29246,7 +29423,61 @@ angular.module('ngCookies', ['ng']).
 		configureRoutes: function(routeProvider) {
 		}
 	});
-	ss.initClass($Acute_Controller, $asm, { control: null });
+	ss.initClass($Acute_BindDomAttributeToDirectiveScopeAttribute, $asm, {
+		get_propertyName: function() {
+			return this.$2$PropertyNameField;
+		},
+		set_propertyName: function(value) {
+			this.$2$PropertyNameField = value;
+		},
+		get_attributeName: function() {
+			return this.$2$AttributeNameField;
+		},
+		set_attributeName: function(value) {
+			this.$2$AttributeNameField = value;
+		},
+		get_bindingType: function() {
+			return this.$2$BindingTypeField;
+		},
+		set_bindingType: function(value) {
+			this.$2$BindingTypeField = value;
+		}
+	});
+	$Acute_BindDomAttributeToDirectiveScopeAttribute.$ctor1.prototype = $Acute_BindDomAttributeToDirectiveScopeAttribute.prototype;
+	ss.initClass($Acute_Controller, $asm, {});
+	ss.initClass($Acute_Directive, $asm, {
+		get_template: function() {
+			return null;
+		},
+		get_templateUrl: function() {
+			return null;
+		},
+		compileTemplate: function(compiler, element, scope) {
+			//todo: handle TemplateUrl
+			if (!ss.isNullOrEmptyString(this.get_template())) {
+				element.html(this.get_template());
+				compiler(element.contents())(scope);
+			}
+		}
+	});
+	ss.initEnum($Acute_DirectiveDomTypes, $asm, { attribute: 1, element: 2, class$1: 4 });
+	ss.initClass($Acute_DirectiveDomTypesAttribute, $asm, {
+		get_domTypes: function() {
+			return this.$2$DomTypesField;
+		},
+		set_domTypes: function(value) {
+			this.$2$DomTypesField = value;
+		}
+	});
+	ss.initClass($Acute_DirectiveNameAttribute, $asm, {
+		get_name: function() {
+			return this.$2$NameField;
+		},
+		set_name: function(value) {
+			this.$2$NameField = value;
+		}
+	});
+	ss.initEnum($Acute_DomAttributeBindingType, $asm, { bound: 0, evaluated: 1 });
 	ss.initClass($Acute_RouteConfig, $asm, {
 		get_templateUrl: function() {
 			return this.$1$TemplateUrlField;
@@ -29283,6 +29514,11 @@ angular.module('ngCookies', ['ng']).
 		$get: function() {
 		}
 	});
+	ss.initClass($Acute_Scope, $asm, {
+		get_model: function() {
+			return this._scope;
+		}
+	});
 	ss.initClass($Acute_Angular_$AngularServiceAttribute, $asm, {
 		get_$serviceName: function() {
 			return this.$2$ServiceNameField;
@@ -29291,11 +29527,14 @@ angular.module('ngCookies', ['ng']).
 			this.$2$ServiceNameField = value;
 		}
 	});
+	ss.initClass($Acute_Angular_$AngularServices, $asm, {});
+	ss.initClass($Acute_Angular_$Compiler, $asm, {});
 	ss.initClass($Acute_Angular_$Cookies, $asm, {});
 	ss.initClass($Acute_Angular_$CookieStore, $asm, {});
 	ss.initClass($Acute_Angular_$Http, $asm, {});
 	ss.initClass($Acute_Angular_$Location, $asm, {});
 	ss.initClass($Acute_Angular_$RouteProvider, $asm, {});
+	ss.initClass($Acute_Angular_$Scope, $asm, {});
 	ss.initInterface($Acute_Services_ICookies, $asm, { get_item: null, set_item: null, get: null, put: null, remove: null });
 	ss.initClass($Acute_Services_Cookies, $asm, {
 		get_item: function(key) {
@@ -29392,7 +29631,7 @@ angular.module('ngCookies', ['ng']).
 		}
 	});
 	$Acute_Services_HttpResponse.$ctor1.prototype = $Acute_Services_HttpResponse.prototype;
-	ss.initInterface($Acute_Services_ILocation, $asm, { get_path: null, set_path: null });
+	ss.initInterface($Acute_Services_ILocation, $asm, { get_absoluteUrl: null, get_host: null, get_port: null, get_protocol: null, get_path: null, set_path: null, get_hash: null, get_search: null });
 	ss.initClass($Acute_Services_Location, $asm, {
 		get_absoluteUrl: function() {
 			return this.$_angularLocation.absUrl();
@@ -29424,7 +29663,7 @@ angular.module('ngCookies', ['ng']).
 		set_search: function(value) {
 			this.$_angularLocation.search(value);
 		}
-	});
+	}, null, [$Acute_Services_ILocation]);
 	ss.initClass($System_Net_Http_HttpMethod, $asm, {
 		get_method: function() {
 			return this.$_method;
@@ -29450,16 +29689,25 @@ angular.module('ngCookies', ['ng']).
 	}, null, [ss.IEquatable]);
 	ss.initEnum($System_Net_Http_HttpStatusCode, $asm, { continue$1: 100, switchingProtocols: 101, OK: 200, created: 201, accepted: 202, nonAuthoritativeInformation: 203, noContent: 204, resetContent: 205, partialContent: 206, ambiguous: 300, multipleChoices: 300, moved: 301, movedPermanently: 301, found: 302, redirect: 302, redirectMethod: 303, seeOther: 303, notModified: 304, useProxy: 305, unused: 306, redirectKeepVerb: 307, temporaryRedirect: 307, badRequest: 400, unauthorized: 401, paymentRequired: 402, forbidden: 403, notFound: 404, methodNotAllowed: 405, notAcceptable: 406, proxyAuthenticationRequired: 407, requestTimeout: 408, conflict: 409, gone: 410, lengthRequired: 411, preconditionFailed: 412, requestEntityTooLarge: 413, requestUriTooLong: 414, unsupportedMediaType: 415, requestedRangeNotSatisfiable: 416, expectationFailed: 417, upgradeRequired: 426, internalServerError: 500, notImplemented: 501, badGateway: 502, serviceUnavailable: 503, gatewayTimeout: 504, httpVersionNotSupported: 505 });
 	ss.setMetadata($Acute_App, { members: [{ name: 'ConfigureRoutes', type: 8, sname: 'configureRoutes', returnType: Object, params: [$Acute_RouteProvider] }] });
+	ss.setMetadata($Acute_BindDomAttributeToDirectiveScopeAttribute, { attrAllowMultiple: true });
+	ss.setMetadata($Acute_DirectiveDomTypes, { enumFlags: true });
 	ss.setMetadata($Acute_RouteProvider, { members: [{ name: '.ctor', type: 1, params: [$Acute_Angular_$RouteProvider] }] });
+	ss.setMetadata($Acute_Scope, { members: [{ name: '.ctor', type: 1, params: [$Acute_Angular_$Scope] }] });
+	ss.setMetadata($Acute_Angular_$Compiler, { attr: [new $Acute_Angular_$AngularServiceAttribute($Acute_Angular_$AngularServices.$compile)] });
 	ss.setMetadata($Acute_Angular_$Cookies, { attr: [new $Acute_Angular_$AngularServiceAttribute('$cookies')] });
 	ss.setMetadata($Acute_Angular_$CookieStore, { attr: [new $Acute_Angular_$AngularServiceAttribute('$cookieStore')] });
 	ss.setMetadata($Acute_Angular_$Http, { attr: [new $Acute_Angular_$AngularServiceAttribute('$http')] });
 	ss.setMetadata($Acute_Angular_$Location, { attr: [new $Acute_Angular_$AngularServiceAttribute('$location')] });
 	ss.setMetadata($Acute_Angular_$RouteProvider, { attr: [new $Acute_Angular_$AngularServiceAttribute('$routeProvider')] });
+	ss.setMetadata($Acute_Angular_$Scope, { attr: [new $Acute_Angular_$AngularServiceAttribute('$scope')] });
 	ss.setMetadata($Acute_Services_Cookies, { members: [{ name: '.ctor', type: 1, params: [$Acute_Angular_$CookieStore, $Acute_Angular_$Cookies] }] });
 	ss.setMetadata($Acute_Services_Http, { members: [{ name: '.ctor', type: 1, params: [$Acute_Angular_$Http] }] });
 	ss.setMetadata($Acute_Services_Location, { members: [{ name: '.ctor', type: 1, params: [$Acute_Angular_$Location] }] });
-	$Acute_Controller.$controlScriptName = 'control';
+	$Acute_Scope.$angularScopeScriptName = '_scope';
+	$Acute_Angular_$AngularServices.$compile = '$compile';
+	$Acute_Angular_$AngularServices.$scope = '$scope';
+	$Acute_Directive.$definitionScriptName = 'definition';
+	$Acute_Directive.$compileTemplateScriptName = 'compileTemplate';
 	$System_Net_Http_HttpMethod.$getMethod = new $System_Net_Http_HttpMethod('GET');
 	$System_Net_Http_HttpMethod.$putMethod = new $System_Net_Http_HttpMethod('PUT');
 	$System_Net_Http_HttpMethod.$postMethod = new $System_Net_Http_HttpMethod('POST');

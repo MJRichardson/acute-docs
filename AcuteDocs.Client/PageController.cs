@@ -1,17 +1,13 @@
-﻿namespace AcuteDocs.Client
+﻿using Acute;
+
+namespace AcuteDocs.Client
 {
     public class PageController : Acute.Controller
     {
-        private readonly Page _page;
-
-        public PageController(Page page)
+        public PageController(Scope scope, Page page)
         {
-            _page = page;
+            scope.Model.Page = page;
         }
 
-        public override void Control(dynamic scope)
-        {
-            scope.Page = _page;
-        }
     }
 }

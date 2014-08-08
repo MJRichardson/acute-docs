@@ -5,27 +5,18 @@ namespace AcuteDocs.Client
 {
     public class NavBarController : Controller
     {
-        private readonly Page _page;
-        private readonly Versions _versions;
 
-        public NavBarController(Page page, Versions versions)
+        public NavBarController(Scope scope, Page page, Versions versions)
         {
-            _page = page;
-            _versions = versions;
-        }
+            scope.Model.Page = page;
+            scope.Model.Versions = versions.AllVersions;
+            scope.Model.SelectedVersion = versions.SelectedVersion;
 
-        public override void Control(dynamic scope)
-        {
-            scope.Page = _page;
-            scope.Versions = _versions.AllVersions;
-            scope.SelectedVersion = _versions.SelectedVersion;
-
-            scope.OnVersionSelected = (Action<string>) (version =>
+            scope.Model.OnVersionSelected = (Action<string>) (version =>
                 {
-                    _versions.SelectedVersion = version;
-                    scope.SelectedVersion = version;
+                    versions.SelectedVersion = version;
+                    scope.Model.SelectedVersion = version;
                 });
-
         }
 
     }
